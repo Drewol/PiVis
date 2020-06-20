@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.8)
+
+project(PIVIS)
+find_package(OpenGL REQUIRED)
+find_package(glfw3 3.3 REQUIRED)
+find_package(Protobuf REQUIRED)
+find_package(PkgConfig REQUIRED)
+find_package(gRPC CONFIG REQUIRED)
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/interfaces)
+file(GLOB protofiles "proto/*.proto")
+foreach(file ${protofiles})
+    get_filename_component(filename ${file} NAME)
+    execute_process(COMMAND /usr/local/bin/protoc --plugin=protoc-gen-grpc=/usr/bin/grpc_cpp_plugin --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/proto --grpc_out=${CMAKE_CURRENT_SOURCE_DIR}/interfaces ${file})
+    execute_process(COMMAND /usr/local/bin/protoc --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/proto --cpp_out=${CMAKE_CURRENT_SOURCE_DIR}/interfaces ${file})
+endforeach()
+
+file(GLOB interface_sources "interfaces/*")
+add_library(interfaces ${interface_sources})
+set_target_properties(interfaces PROPERTIES LINKER_LANGUAGE CXX)
+
+file(GLOB sources "clients/src/*.cpp")
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/interfaces clients/include)
+add_executable(pivis ${sources})
+target_link_libraries(pivis glfw)
+target_link_libraries(pivis OpenGL::GL)
+target_link_libraries(pivis gRPC::grpc++)
+target_link_libraries(pivis interfaces)

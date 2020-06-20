@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package test;
+
+enum TabIndex {
+    HOME = 0;
+    DATA = 1;
+    PERF = 2;
+}
+
+message ChangeTab {
+    TabIndex tab = 1;
+}
+
+message EmptyResult {};
+
+service TestService {
+    rpc SetTab(ChangeTab) returns (EmptyResult) {}
+}
