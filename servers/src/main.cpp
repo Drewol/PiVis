@@ -1,9 +1,11 @@
-#define GLFW_INCLUDE_ES3
-#define GLFW_INCLUDE_GLEXT
+#include <stdio.h>
+#include "GLES2/gl2.h"
+#include "EGL/egl.h"
+#include "EGL/eglext.h"
 #include <GLFW/glfw3.h>
-#include <nanovg.h>
-#define NANOVG_GLES3_IMPLEMENTATION	// Use GL2 implementation.
-#include <nanovg_gl.h>
+#include "nanovg.h"
+#define NANOVG_GLES2_IMPLEMENTATION	// Use GL2 implementation.
+#include "nanovg_gl.h"
 
 #include "test.hpp"
 #include <test.grpc.pb.h>
@@ -48,7 +50,7 @@ int main(int argc, char const *argv[])
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
-    NVGcontext* vg = nvgCreateGLES3(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
+    NVGcontext* vg = nvgCreateGLES2(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
     TestImpl service(vg);
     grpc::ServerBuilder builder;
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
