@@ -16,4 +16,5 @@ message EmptyResult {};
 
 service TestService {
     rpc SetTab(ChangeTab) returns (EmptyResult) {}
+    rpc GetTab(EmptyResult) returns (ChangeTab) {}
 }

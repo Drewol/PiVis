@@ -19,10 +19,16 @@ file(GLOB interface_sources "interfaces/*")
 add_library(interfaces ${interface_sources})
 set_target_properties(interfaces PROPERTIES LINKER_LANGUAGE CXX)
 
-file(GLOB sources "clients/src/*.cpp")
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/interfaces clients/include)
+add_library(nanovg nanovg/src/nanovg.c)
+target_include_directories(nanovg PRIVATE nanovg/src)
+set_target_properties(nanovg PROPERTIES LINKER_LANGUAGE C)
+
+
+file(GLOB sources "servers/src/*.cpp")
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/interfaces servers/include nanovg/src)
 add_executable(pivis ${sources})
 target_link_libraries(pivis glfw)
 target_link_libraries(pivis OpenGL::GL)
 target_link_libraries(pivis gRPC::grpc++)
 target_link_libraries(pivis interfaces)
+target_link_libraries(pivis nanovg)
