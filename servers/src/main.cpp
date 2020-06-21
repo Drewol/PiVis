@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "GLES2/gl2.h"
-#include "EGL/egl.h"
-#include "EGL/eglext.h"
+#include "GLES2/gl2ext.h"
+#define GLFW_INCLUDE_ES2
 #include <GLFW/glfw3.h>
 #include "nanovg.h"
 #define NANOVG_GLES2_IMPLEMENTATION	// Use GL2 implementation.
@@ -13,6 +13,7 @@
 #include <grpcpp/server_builder.h>
 #include <grpcpp/server_context.h>
 #include <grpcpp/security/server_credentials.h>
+#include <grpcpp/health_check_service_interface.h>
 #include <chrono>
 
 void errorcb(int error, const char* desc)
@@ -38,7 +39,7 @@ int main(int argc, char const *argv[])
     /* Create a windowed mode window and its OpenGL context */
     glfwSetErrorCallback(errorcb);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
     if (!window)
@@ -51,7 +52,10 @@ int main(int argc, char const *argv[])
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
     NVGcontext* vg = nvgCreateGLES2(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
+
+    //start grpc service
     TestImpl service(vg);
+    grpc::EnableDefaultHealthCheckService(true);
     grpc::ServerBuilder builder;
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
     builder.RegisterService(&service);

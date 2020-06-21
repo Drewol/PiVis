@@ -1,10 +1,12 @@
 #include <test.grpc.pb.h>
 #include "BaseServer.hpp"
-class TestImpl final : public test::TestService::Service, public BaseServer {
+using namespace test;
+using namespace grpc;
+class TestImpl final : public TestService::Service, public BaseServer {
 public:
     TestImpl(struct NVGcontext* vg);
-    test::EmptyResult SetTab(test::ChangeTab changeTab);
-    test::ChangeTab GetTab(test::EmptyResult);
+    Status SetTab(ServerContext* context, const ChangeTab* tab, EmptyResult* response) override;
+    Status GetTab(ServerContext* context, const EmptyResult* tab, ChangeTab* response) override;
     void Render(struct NVGcontext* vg, float deltaTime) override;
 private:
     test::TabIndex currentTab;

@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package test;
+option csharp_namespace = "GrpcTestService";
 
 enum TabIndex {
     HOME = 0;
@@ -12,9 +13,14 @@ message ChangeTab {
     TabIndex tab = 1;
 }
 
+message StringRequest {
+    string text = 1;
+}
+
 message EmptyResult {};
 
 service TestService {
     rpc SetTab(ChangeTab) returns (EmptyResult) {}
     rpc GetTab(EmptyResult) returns (ChangeTab) {}
+    rpc SetMessage(StringRequest) returns (EmptyResult) {}
 }

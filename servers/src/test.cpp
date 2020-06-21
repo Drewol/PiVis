@@ -2,9 +2,8 @@
 #include <test.grpc.pb.h>
 #include "../../nanovg/src/nanovg.h"
 
-using test::EmptyResult;
-using test::TabIndex;
-using test::ChangeTab;
+using namespace test;
+using namespace grpc;
 
 TestImpl::TestImpl(NVGcontext* vg)
 {
@@ -12,10 +11,10 @@ TestImpl::TestImpl(NVGcontext* vg)
     currentTab = TabIndex::HOME;
 }
 
-test::EmptyResult TestImpl::SetTab(test::ChangeTab changeTab) {
-    printf("Changing %d->%d\n", currentTab, changeTab.tab());
-    currentTab = changeTab.tab();
-    return test::EmptyResult();
+Status TestImpl::SetTab(ServerContext* context, const ChangeTab* tab, EmptyResult* response) {
+    printf("Changing %d->%d\n", currentTab, tab->tab());
+    currentTab = tab->tab();
+    return Status::OK;
 }
 
 void TestImpl::Render(NVGcontext* vg, float deltaTime)
@@ -23,7 +22,7 @@ void TestImpl::Render(NVGcontext* vg, float deltaTime)
     std::string fpsText;
     char buff[64];
     avgFps = avgFps * 0.98f + deltaTime * 0.02f;
-    snprintf(buff, 32, "%.2f FPS", 1.0 / avgFps);
+    snprintf(buff , 32, "%.2f FPS", 1.0 / avgFps);
     fpsText = buff;
     nvgBeginPath(vg);
     nvgFillColor(vg, nvgRGB(255,255,255));
@@ -49,8 +48,7 @@ void TestImpl::Render(NVGcontext* vg, float deltaTime)
     nvgText(vg, 50, 300, fpsText.c_str(), nullptr);
 }
 
-test::ChangeTab TestImpl::GetTab(EmptyResult _) {
-    ChangeTab result;
-    result.set_tab(currentTab);
-    return result;
+Status TestImpl::GetTab(ServerContext* context, const EmptyResult* tab, ChangeTab* response) {
+    response->set_tab(currentTab);
+    return Status::OK;
 }
