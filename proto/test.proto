@@ -17,10 +17,15 @@ message StringRequest {
     string text = 1;
 }
 
+message HueRequest {
+    double hue = 1;
+}
+
 message EmptyResult {};
 
 service TestService {
     rpc SetTab(ChangeTab) returns (EmptyResult) {}
     rpc GetTab(EmptyResult) returns (ChangeTab) {}
     rpc SetMessage(StringRequest) returns (EmptyResult) {}
+    rpc SetHue(HueRequest) returns (EmptyResult) {}
 }
