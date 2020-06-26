@@ -1,3 +1,7 @@
+#pragma once
+#ifdef WIN32
+#include <winsdkver.h>
+#endif
 #include <test.grpc.pb.h>
 #include "BaseServer.hpp"
 using namespace test;

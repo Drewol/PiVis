@@ -1,7 +1,14 @@
 #include <stdio.h>
+#ifdef WIN32
+#define NOMINMAX
+#include <Windows.h>
+#include <GL/glew.h>
+#include <GL/wglew.h>
+#else
 #include "GLES2/gl2.h"
 #include "GLES2/gl2ext.h"
 #define GLFW_INCLUDE_ES2
+#endif
 #include <GLFW/glfw3.h>
 #include "nanovg.h"
 #define NANOVG_GLES2_IMPLEMENTATION	// Use GL2 implementation.
@@ -28,6 +35,9 @@ void window_size_callback(GLFWwindow* window, int width, int height)
 
 int main(int argc, char const *argv[])
 {    
+
+
+
     std::string server_address("0.0.0.0:50051");
     GLFWwindow* window;
 
@@ -51,6 +61,16 @@ int main(int argc, char const *argv[])
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
+
+#ifdef WIN32
+    GLint GlewInitResult = glewInit();
+    if (GLEW_OK != GlewInitResult)
+    {
+        printf("ERROR: %s", glewGetErrorString(GlewInitResult));
+        exit(EXIT_FAILURE);
+    }
+#endif // WIN32
+
     NVGcontext* vg = nvgCreateGLES2(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
 
     //start grpc service

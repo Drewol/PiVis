@@ -1,3 +1,7 @@
+#ifdef WIN32
+#define NOMINMAX
+#include <Windows.h>
+#endif
 #include "test.hpp"
 #include <test.grpc.pb.h>
 #include "../../nanovg/src/nanovg.h"
