@@ -14,14 +14,48 @@
 #define NANOVG_GLES2_IMPLEMENTATION	// Use GL2 implementation.
 #include "nanovg_gl.h"
 
-#include "test.hpp"
-#include <test.grpc.pb.h>
+#include "BaseServer.hpp"
+#include "pivis.grpc.pb.h"
 #include <grpcpp/server.h>
 #include <grpcpp/server_builder.h>
 #include <grpcpp/server_context.h>
 #include <grpcpp/security/server_credentials.h>
 #include <grpcpp/health_check_service_interface.h>
+
 #include <chrono>
+#include <map>
+
+std::map<std::string, BaseServer*>* g_Services = new std::map<std::string, BaseServer*>();
+
+using pivis::Empty;
+using pivis::ServiceList;
+using pivis::ServiceSelection;
+
+class PiVisService : public pivis::PiVis::Service {
+public:
+    BaseServer* currentService = nullptr;
+    PiVisService() = default;
+    grpc::Status GetServices(grpc::ServerContext* context, const Empty* request, ServiceList* response) override {
+        int i = 0;
+        for (auto& s : *g_Services)
+        {
+            response->add_services(s.first);
+        }
+        return grpc::Status::OK;
+    }
+    grpc::Status SetService(grpc::ServerContext* context, const ServiceSelection* request, Empty* response) override {
+        std::string newService = request->service();
+        if (g_Services->find(newService) != g_Services->end())
+        {
+            currentService = g_Services->at(newService);
+        }
+        else {
+            return grpc::Status::Status(grpc::StatusCode::OUT_OF_RANGE, "No service \"" + newService + "\" exists.");
+        }
+
+        return grpc::Status::OK;
+    }
+};
 
 void errorcb(int error, const char* desc)
 {
@@ -35,10 +69,7 @@ void window_size_callback(GLFWwindow* window, int width, int height)
 
 int main(int argc, char const *argv[])
 {    
-
-
-
-    std::string server_address("0.0.0.0:50051");
+    std::string server_address("127.0.0.1:50051");
     GLFWwindow* window;
 
 	if (!glfwInit()) {
@@ -74,11 +105,19 @@ int main(int argc, char const *argv[])
     NVGcontext* vg = nvgCreateGLES2(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
 
     //start grpc service
-    TestImpl service(vg);
     grpc::EnableDefaultHealthCheckService(true);
     grpc::ServerBuilder builder;
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
+    PiVisService pvs;
+    builder.RegisterService(&pvs);
+
+    for (auto& s : *g_Services)
+    {
+        s.second->Init(vg);
+        s.second->Register(builder);
+        pvs.currentService = s.second;
+    }
+
     std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
     std::cout << "Server listening on " << server_address << std::endl;
     /* Loop until the user closes the window */
@@ -96,7 +135,7 @@ int main(int argc, char const *argv[])
         glfwGetWindowSize(window, &w, &h);
         
         nvgBeginFrame(vg, w, h, 1.0);
-        service.Render(vg, frameTime);
+        pvs.currentService->Render(vg, frameTime);
         nvgEndFrame(vg);
 
         /* Swap front and back buffers */

@@ -14,6 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Protobuf Include="..\..\..\proto\pivis.proto" GrpcServices="Client">
+      <Link>Protos\pivis.proto</Link>
+    </Protobuf>
     <Protobuf Include="..\..\..\proto\test.proto" GrpcServices="Client">
       <Link>Protos\test.proto</Link>
     </Protobuf>

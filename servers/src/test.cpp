@@ -9,11 +9,26 @@
 using namespace test;
 using namespace grpc;
 
-TestImpl::TestImpl(NVGcontext *vg)
+TestImpl::TestImpl()
+{
+    font = -1;
+    currentTab = TabIndex::HOME;
+    message = "";
+    g_Services->insert(std::make_pair("test", this));
+}
+
+TestImpl* instance = new TestImpl();
+
+void TestImpl::Init(NVGcontext *vg)
 {
     font = nvgCreateFont(vg, "default", "fonts/Roboto/Roboto-Regular.ttf");
     currentTab = TabIndex::HOME;
     message = "";
+}
+
+void TestImpl::Register(grpc::ServerBuilder& builder)
+{
+    builder.RegisterService(this);
 }
 
 Status TestImpl::SetTab(ServerContext *context, const ChangeTab *tab, EmptyResult *response)

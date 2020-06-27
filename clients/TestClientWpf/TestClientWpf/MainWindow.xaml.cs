@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Grpc.Net.Client;
 using GrpcTestService;
+using GrpcPiVisService;
 
 namespace TestClientWpf
 {
@@ -23,23 +24,24 @@ namespace TestClientWpf
     public partial class MainWindow : Window
     {
         private GrpcChannel channel;
-        private TestService.TestServiceClient client;
+        private TestService.TestServiceClient testclient;
+        private PiVis.PiVisClient pivisclient;
 
 
         public MainWindow()
         {
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            channel = GrpcChannel.ForAddress("http://192.168.0.236:50051");
-            client = new TestService.TestServiceClient(channel);
+            channel = GrpcChannel.ForAddress("http://127.0.0.1:50051");
+            testclient = new TestService.TestServiceClient(channel);
+            pivisclient = new PiVis.PiVisClient(channel);
             InitializeComponent();
             CurrentTab.Content = "Home";
-            TabSelector.ItemsSource = Enum.GetValues(typeof(GrpcTestService.TabIndex));
-            TabSelector.SelectedItem = GrpcTestService.TabIndex.Home;
+            TabSelector.ItemsSource = pivisclient.GetServices(new Empty()).Services;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            client.SetMessage(new StringRequest() { Text = Message.Text });
+            testclient.SetMessage(new StringRequest() { Text = Message.Text });
         }
 
         private void TabSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -48,16 +50,16 @@ namespace TestClientWpf
             {
                 var newTab = item as GrpcTestService.TabIndex?;
                 if (item != null)
-                    client.SetTab(new ChangeTab() { Tab = newTab ?? GrpcTestService.TabIndex.Home });
+                    testclient.SetTab(new ChangeTab() { Tab = newTab ?? GrpcTestService.TabIndex.Home });
 
-                CurrentTab.Content = client.GetTab(new EmptyResult()).Tab.ToString();
+                CurrentTab.Content = testclient.GetTab(new EmptyResult()).Tab.ToString();
             }
         }
 
         private async void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             System.Diagnostics.Debug.WriteLine(e.NewValue);
-            await client.SetHueAsync(new HueRequest() { Hue = e.NewValue });
+            await testclient.SetHueAsync(new HueRequest() { Hue = e.NewValue });
         }
     }
 }
