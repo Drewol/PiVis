@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pivis;
+option csharp_namespace = "GrpcPiVisService";
+
+message Empty {};
+message ServiceList {
+    repeated string services = 1;
+}
+
+message ServiceSelection {
+    string service = 1;
+}
+
+service PiVis {
+    rpc GetServices(Empty) returns (ServiceList) {}
+    rpc SetService(ServiceSelection) returns (Empty) {}
+}
