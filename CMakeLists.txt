@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 3.8)
 project(PIVIS)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 3.3 REQUIRED)
-find_package(PkgConfig REQUIRED)
-
+if(NOT MSVC)
+    find_package(PkgConfig REQUIRED)
+endif(NOT MSVC)
 
 option(USE_SYSTEM_GRPC "Use system installed gRPC" OFF)
 if(USE_SYSTEM_GRPC)
@@ -55,8 +56,8 @@ target_include_directories(nanovg PRIVATE nanovg/src)
 set_target_properties(nanovg PROPERTIES LINKER_LANGUAGE C)
 
 
-file(GLOB sources "servers/src/*.cpp")
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/interfaces servers/include nanovg/src /opt/vc/include)
+file(GLOB_RECURSE sources services/*.cpp services/*.hpp)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/interfaces services/include nanovg/src /opt/vc/include)
 add_executable(pivis ${sources})
 target_compile_features(pivis PUBLIC cxx_std_17)
 message(STATUS "OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")

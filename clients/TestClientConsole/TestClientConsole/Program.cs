@@ -13,7 +13,7 @@ namespace TestClientConsole
         {
             
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            using GrpcChannel channel = GrpcChannel.ForAddress("http://192.168.0.236:50051");
+            using GrpcChannel channel = GrpcChannel.ForAddress("http://127.0.0.1:50051");
             TestService.TestServiceClient client = new TestService.TestServiceClient(channel);
 
             TabIndex opt = TabIndex.Home;

@@ -3,13 +3,14 @@
 #include <winsdkver.h>
 #endif
 #include <test.grpc.pb.h>
-#include "BaseServer.hpp"
+#include "BaseService.hpp"
 using namespace test;
 using namespace grpc;
-class TestImpl final : public TestService::Service, public BaseServer
+class TestImpl final : public TestService::Service, public BaseService
 {
 public:
     TestImpl();
+    ~TestImpl() = default;
     Status SetTab(ServerContext *context, const ChangeTab *tab, EmptyResult *response) override;
     Status GetTab(ServerContext *context, const EmptyResult *tab, ChangeTab *response) override;
     Status SetMessage(ServerContext *context, const StringRequest *request, EmptyResult *response) override;

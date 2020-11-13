@@ -14,7 +14,8 @@
 #define NANOVG_GLES2_IMPLEMENTATION	// Use GL2 implementation.
 #include "nanovg_gl.h"
 
-#include "BaseServer.hpp"
+#include "BaseService.hpp"
+#include "ServiceManager.hpp"
 #include "pivis.grpc.pb.h"
 #include <grpcpp/server.h>
 #include <grpcpp/server_builder.h>
@@ -25,19 +26,17 @@
 #include <chrono>
 #include <map>
 
-std::map<std::string, BaseServer*>* g_Services = new std::map<std::string, BaseServer*>();
-
 using pivis::Empty;
 using pivis::ServiceList;
 using pivis::ServiceSelection;
 
 class PiVisService : public pivis::PiVis::Service {
 public:
-    BaseServer* currentService = nullptr;
+    BaseService* currentService = nullptr;
     PiVisService() = default;
     grpc::Status GetServices(grpc::ServerContext* context, const Empty* request, ServiceList* response) override {
         int i = 0;
-        for (auto& s : *g_Services)
+        for (auto& s : ServiceManager::Get()->GetServices())
         {
             response->add_services(s.first);
         }
@@ -45,9 +44,10 @@ public:
     }
     grpc::Status SetService(grpc::ServerContext* context, const ServiceSelection* request, Empty* response) override {
         std::string newService = request->service();
-        if (g_Services->find(newService) != g_Services->end())
+        auto serviceMap = ServiceManager::Get()->GetServices();
+        if (serviceMap.find(newService.c_str()) != serviceMap.end())
         {
-            currentService = g_Services->at(newService);
+            currentService = serviceMap.at(newService);
         }
         else {
             return grpc::Status::Status(grpc::StatusCode::OUT_OF_RANGE, "No service \"" + newService + "\" exists.");
@@ -111,7 +111,7 @@ int main(int argc, char const *argv[])
     PiVisService pvs;
     builder.RegisterService(&pvs);
 
-    for (auto& s : *g_Services)
+    for (auto& s : ServiceManager::Get()->GetServices())
     {
         s.second->Init(vg);
         s.second->Register(builder);

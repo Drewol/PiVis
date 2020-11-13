@@ -14,10 +14,7 @@ TestImpl::TestImpl()
     font = -1;
     currentTab = TabIndex::HOME;
     message = "";
-    g_Services->insert(std::make_pair("test", this));
 }
-
-TestImpl* instance = new TestImpl();
 
 void TestImpl::Init(NVGcontext *vg)
 {
@@ -89,3 +86,5 @@ void TestImpl::Render(NVGcontext *vg, float deltaTime)
     nvgText(vg, 50, 10, title.c_str(), nullptr);
     nvgText(vg, 50, 40, text.c_str(), nullptr);
 }
+
+REGISTER_SERVICE("test", TestImpl);

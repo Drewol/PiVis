@@ -7,21 +7,24 @@
 #include <map>
 #include <string>
 
-class BaseServer
+#include "ServiceManager.hpp"
+
+class BaseService
 {
     public: 
+    virtual ~BaseService() = 0;
     virtual void Render(struct NVGcontext* vg, float deltaTime) = 0;
     virtual void Init(struct NVGcontext* vg) = 0;
     virtual void Register(grpc::ServerBuilder& builder) = 0;
 };
 
-extern class std::map<std::string, BaseServer*>* g_Services;
-
 template<class T>
-struct StaticReg {
-    const char* name;
-
-    StaticReg(std::string name, T* service) {
-        g_Services->insert(std::make_pair(name, service));
-    };
+class ServiceEntry
+{
+public:
+    ServiceEntry(std::string name) {
+        ServiceManager::Get()->AddService(name, new T());
+    }
 };
+
+#define REGISTER_SERVICE(name, service) static ServiceEntry<service> service_obj(name)
