@@ -1,5 +1,5 @@
 # PiVis
-Display remotely controled data on a Raspberry Pi using grpc, nanovg, and glfw.
+Remote data visualization targeting Raspberry Pi using grpc, nanovg, and glfw.
 
 ## Running
 The `servers` folder contains what the Raspberry Pi will run and this can be buily by running `mkdir build && cd build && cmake .. && make` 
